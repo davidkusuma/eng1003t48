@@ -35,10 +35,17 @@ var outputField = document.getElementById("messageField");
 //Call to restart program
 document.getElementById("restartButton").onclick = restart();
 
-//Object for Lookup Table
+//Object hfor Lookup Table
 var lookupTable = {
 	DotDash: "a",
 	DashDotDotDot: "b",
+	DashDotDashDot: "c",
+	DashDotDot: "d",
+	Dot: "e",
+	DotDotDashDot: "f",
+	DashDashDot: "g",
+	DotDotDotDot: "h",
+	
 	
 }
 
