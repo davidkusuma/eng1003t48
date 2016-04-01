@@ -25,50 +25,67 @@
 
 
 // ADD YOUR ADDITIONAL FUNCTIONS AND GLOBAL VARIABLES HERE
+
+/*For reference in this code, a red screen in the transmission corresponds to 
+  a true statement, while a blue screen corresponds to a false statement*/
+
+//Variable declaration for easy display of output
+var outputField = document.getElementById("messageField");
+
+//Call to restart program
+document.getElementById("restartButton").onclick = restart();
+
+//Object for Lookup Table
 var lookupTable = {
 	DotDash: "a",
 	DashDotDotDot: "b",
-	DashDotDashDot: "c",
 	
 }
 
-var currentCharacter = [];
-var outputArea = document.getElementById("messageField");
+//Variable to set program state, initially false
+var receivingMessage = false;
+//Variable to store the last state of the transmission
+var lastResponse;
+//Variable that counts the amount of same responses in a row
+var count = 0;
+//Variable to store the character as it's determined
+var currentCharacter = "";
 
-function checkEndOfWord() {
-	var endOfWord = true;
-	var counter = 0;
-	var endOfArray = currentWord.length - 1;
-	while(endOfWord = true && counter <= 7) {
-		if(currentWord[endOfArray - counter] == true) {
-			return null;
-		}else {
-			counter++;
-		}
+//Function to determine if the series of input corresponds to a dot or dash
+function parseDotDash() {
+	if(count <= 2) {
+		currentCharacter += "Dot";
+	}else {
+		currentCharacter += "Dash";
 	}
-	
 }
 
-function checkEndOfCharacter() {
-	var endOfCharacter = true;
-	var coutner = 0;
-	var endOfArray = currentCharacter.length - 1;
-	while(endOfCharacter = true && counter <= 6) {
-		if(currentCharacter[endOfArray - counter] == true) {
-			return null;
-		}else {
-			counter++;
-		}
+//Function to determine what kind of break the input corresponds to
+function parseOff() {
+	if(count <= 2) {
+		return null;
+	}else if(count > 2 && count <= 6) {
+		parseChar();
+	}else {
+		parseChar();
+		outputField.innerHTML += " ";
 	}
-	parseCharacter();
 }
 
-function parseCharacter() {
-	var character;
-	
-	outputArea.innerHTML += character;
-	currentCharacter = [];
+//Function to take the current character and print out the corresponding character to output
+function parseChar() {
+	outputField.innerHTML += lookupTable['currentCharacter'];
+	currentCharacter = "";
 }
+
+//Function to reset program to waiting state
+function restart() {
+	count = 0;
+	lastResponse = null;
+	currentCharacter = "";
+	receivingMessage = false;
+}
+
 /*
  * This function is called once per unit of time with camera image data.
  * 
@@ -82,9 +99,10 @@ function parseCharacter() {
  
 function decodeCameraImage(data)
 {
-    // ADD YOUR CODE HERE
+    //Counters for the amount of red and blue pixels
 	var red = 0, blue = 0;
 	
+	//Compares the red and blue values of a pixel and sees which is higher
 	for(var i = 0; i < data.length; i += 4) {
 		if(data[i] > data[i+2]) {
 			red++;
@@ -92,13 +110,39 @@ function decodeCameraImage(data)
 			blue++;
 		}	
 	}
+	
 	if(red > blue) {
-		currentWord.push(true);
-		checkEndOfCharacter();
+		//Steps if input is red
+		
+		//Special first condition for when transmission starts
+		if(receivingMessage === false) {
+			receivingMessage = true;
+			count++;
+		}else {
+			//Conditions for while receiving input
+			if(lastResponse === true) {
+				count++;
+			}else {
+				parseOff();
+				count = 1;
+			}
+		}
+		
+		lastResponse = true;
 		return true;
 	}else {
-		currentWord.push(false);
-		checkEndOfCharacter();
+		//Steps if input is blue
+		
+		if(receivingMessage === true) {
+			if(lastResponse === false) {
+				count++;
+			}else {
+				parseDotDash();
+				count = 1;
+			}
+		}
+		
+		lastResponse = false;
 		return false;
 	}
 }
