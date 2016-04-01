@@ -33,13 +33,62 @@
 var outputField = document.getElementById("messageField");
 
 //Call to restart program
-document.getElementById("restartButton").onclick = restart();
+document.getElementById("restartButton").onclick = restart;
 
 //Object for Lookup Table
 var lookupTable = {
 	DotDash: "a",
 	DashDotDotDot: "b",
-	
+	DashDotDashDot: "c",
+	DashDotDot: "d",
+	Dot: "e",
+	DotDotDashDot: "f",
+	DashDashDot: "g",
+	DotDotDotDot: "h",
+	DotDot: "i",
+	DotDashDashDash: "j",
+	DashDotDash: "k",
+	DotDashDotDot: "l",
+	DashDash: "m",
+	DashDot: "n",
+	DashDashDash: "o",
+	DotDashDashDot: "p",
+	DashDashDotDash: "q",
+	DotDashDot: "r",
+	DotDotDot: "s",
+	Dash: "t",
+	DotDotDash: "u",
+	DotDotDotDash: "v",
+	DotDashDash: "w",
+	DashDotDotDash: "x",
+	DashDotDashDash: "y",
+	DashDashDotDot: "z",
+	DashDashDashDashDash: "0",
+	DotDashDashDashDash: "1",
+	DotDotDashDashDash: "2",
+	DotDotDotDashDash: "3",
+	DotDotDotDotDash: "4",
+	DotDotDotDotDot: "5",
+	DashDotDotDotDot: "6",
+	DashDashDotDotDot: "7",
+	DashDashDashDotDot: "8",
+	DashDashDashDashDot: "9",
+	DashDotDashDashDot: "(",
+	DashDotDashDashDotDash: ")",
+	DotDashDotDotDashDot: "\"",
+	DotDotDotDotDotDotDotDotDashDotDotDash: "$",
+	DotDashDashDashDashDot: "\\",
+	DashDotDotDashDot: "/",
+	DotDashDotDashDot: "+",
+	DashDashDashDotDotDot: ":",
+	DotDashDotDashDotDash: ".",
+	DashDashDotDotDashDash: ",",
+	DotDotDashDashDotDot: "?",
+	DashDotDotDotDotDash: "-",
+	DotDashDashDotDashDot: "@",
+	DashDotDotDotDash: "=",
+	DotDotDashDashDotDashDotDotDashDashDotDash: "_",
+	DashDashDashDotDashDashDashDot: "!",
 }
 
 //Variable to set program state, initially false
@@ -74,16 +123,26 @@ function parseOff() {
 
 //Function to take the current character and print out the corresponding character to output
 function parseChar() {
-	outputField.innerHTML += lookupTable['currentCharacter'];
-	currentCharacter = "";
+	if(currentCharacter === "DotDotDotDashDotDash") {
+		endTransmission();
+	}else {
+		outputField.innerHTML += lookupTable[currentCharacter];
+		currentCharacter = "";
+	}
 }
-
+	
 //Function to reset program to waiting state
 function restart() {
 	count = 0;
 	lastResponse = null;
 	currentCharacter = "";
 	receivingMessage = false;
+	outputField.innerHTML = "";
+}
+
+function endTransmission() {
+	receivingMessage = false;
+	messageFinished();
 }
 
 /*
@@ -136,6 +195,9 @@ function decodeCameraImage(data)
 		if(receivingMessage === true) {
 			if(lastResponse === false) {
 				count++;
+				if(count > 10) {
+					parseOff();
+				}
 			}else {
 				parseDotDash();
 				count = 1;
