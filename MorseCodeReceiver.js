@@ -1,3 +1,9 @@
+//ENG1003 Assignment 1, Morse Code Receiver App, Team 048
+//Dustin Haines
+//David Kusuma
+//Jacinda Pagels
+//Win Seah
+
 /*
  * Morse Code receiver app information:
  *
@@ -29,13 +35,13 @@
 /*For reference in this code, a red screen in the transmission corresponds to 
   a true statement, while a blue screen corresponds to a false statement*/
 
-//Variable declaration for easy display of output
+//Variable declaration for output area to easily reference the output
 var outputField = document.getElementById("messageField");
 
-//Call to restart program
+//Restart() function is called when the element with ID restartButton is clicked
 document.getElementById("restartButton").onclick = restart;
 
-//Object for Lookup Table
+//Object for Lookup Table, stores all appropriate values
 var lookupTable = {
 	DotDash: "a",
 	DashDotDotDot: "b",
@@ -77,7 +83,7 @@ var lookupTable = {
 	DashDotDashDashDotDash: ")",
 	DotDashDotDotDashDot: "\"",
 	DotDotDotDotDotDotDotDotDashDotDotDash: "$",
-	DotDashDashDashDashDot: "\\",
+	DotDashDashDashDashDot: "'",
 	DashDotDotDashDot: "/",
 	DotDashDotDashDot: "+",
 	DashDashDashDotDotDot: ":",
@@ -87,20 +93,23 @@ var lookupTable = {
 	DashDotDotDotDotDash: "-",
 	DotDashDashDotDashDot: "@",
 	DashDotDotDotDash: "=",
-	DotDotDashDashDotDashDotDotDashDashDotDash: "_",
-	DashDashDashDotDashDashDashDot: "!",
+	DotDotDashDashDotDash: "_",
+	DashDotDashDotDashDash: "!",
+	DotDotDotDashDotDotDash: "$",
+	DotDashDotDash: "\n",
 }
 
-//Variable to set program state, initially false
+//Variable to set program state, stops it from starting on page load, initially false
 var receivingMessage = false;
-//Variable to store the last state of the transmission
+//Variable to store the last state of the transmission, AKA the last response
 var lastResponse;
-//Variable that counts the amount of same responses in a row
+//Variable that counts the amount of identical responses in a row
 var count = 0;
-//Variable to store the character as it's determined
+//Variable to store the character as it's determined, contains a mix of Dots and Dashes
 var currentCharacter = "";
 
 //Function to determine if the series of input corresponds to a dot or dash
+//Checks count to see if it was a Dot or Dash
 function parseDotDash() {
 	if(count <= 2) {
 		currentCharacter += "Dot";
@@ -110,6 +119,7 @@ function parseDotDash() {
 }
 
 //Function to determine what kind of break the input corresponds to
+//Looks at count to see if it was an intercharacter space, character space or word space
 function parseOff() {
 	if(count <= 2) {
 		return null;
@@ -122,27 +132,24 @@ function parseOff() {
 }
 
 //Function to take the current character and print out the corresponding character to output
+//References the lookup table to determine the character
 function parseChar() {
 	if(currentCharacter === "DotDotDotDashDotDash") {
-		endTransmission();
+		receivingMessage = false;
+		messageFinished();
 	}else {
 		outputField.innerHTML += lookupTable[currentCharacter];
 		currentCharacter = "";
 	}
 }
 	
-//Function to reset program to waiting state
+//Function to reset program to waiting state, ready for next transmission
 function restart() {
 	count = 0;
 	lastResponse = null;
 	currentCharacter = "";
 	receivingMessage = false;
 	outputField.innerHTML = "";
-}
-
-function endTransmission() {
-	receivingMessage = false;
-	messageFinished();
 }
 
 /*
@@ -160,8 +167,7 @@ function decodeCameraImage(data)
 {
     //Counters for the amount of red and blue pixels
 	var red = 0, blue = 0;
-	
-	//Compares the red and blue values of a pixel and sees which is higher
+	//Compares the red and blue values of a pixel and sees which is higher, incrementing the appropriate counter
 	for(var i = 0; i < data.length; i += 4) {
 		if(data[i] > data[i+2]) {
 			red++;
@@ -172,11 +178,10 @@ function decodeCameraImage(data)
 	
 	if(red > blue) {
 		//Steps if input is red
-		
-		//Special first condition for when transmission starts
+		//Special first condition for when transmission starts to start constant capture
 		if(receivingMessage === false) {
 			receivingMessage = true;
-			count++;
+			count = 1;
 		}else {
 			//Conditions for while receiving input
 			if(lastResponse === true) {
@@ -186,12 +191,10 @@ function decodeCameraImage(data)
 				count = 1;
 			}
 		}
-		
 		lastResponse = true;
 		return true;
 	}else {
 		//Steps if input is blue
-		
 		if(receivingMessage === true) {
 			if(lastResponse === false) {
 				count++;
@@ -203,7 +206,6 @@ function decodeCameraImage(data)
 				count = 1;
 			}
 		}
-		
 		lastResponse = false;
 		return false;
 	}
